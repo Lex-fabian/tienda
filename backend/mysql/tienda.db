@@ -1,82 +1,462 @@
-create database tienda;
+/*
+ Navicat Premium Dump SQL
 
+ Source Server         : mariadb
+ Source Server Type    : MariaDB
+ Source Server Version : 110802 (11.8.2-MariaDB)
+ Source Host           : localhost:3306
+ Source Schema         : tienda
 
-create TABLE vendedor 
-(
-id_vendedor int auto_increment primary key,
-nombre varchar(50) not null,
-apellido varchar(50) not null,
-email varchar(250) not NULL unique,
-telefono varchar(10) not null unique,
-direccion varchar(255),
-tipo_identificacion enum('C','P', 'R') COMMENT 'C=CEDULA, P=PASAPORTE, R=RUC' DEFAULT 'C',
-identificacion varchar(10) not null unique,
-usuario varchar(50) UNIQUE not null,
-clave varchar(255) unique not null,
-estado enum('A','I') COMMENT 'A=ACTIVO, I=INACTIVO' DEFAULT 'A',
-fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP() COMMENT 'FECHA DE CREACION DEL VENDEDOR',
-fecha_modificacion datetime DEFAULT CURRENT_TIMESTAMP() on UPDATE CURRENT_TIMESTAMP()
-);
+ Target Server Type    : MariaDB
+ Target Server Version : 110802 (11.8.2-MariaDB)
+ File Encoding         : 65001
 
+ Date: 05/09/2025 21:48:20
+*/
 
-CREATE TABLE cliente 
-(
-id_cliente int auto_increment primary key,
-nombre varchar(50) not null,
-apellido varchar(50) not null,
-email varchar(255) not null unique,
-telefono varchar(10) not null unique,
-direccion varchar(255),
-tipo_identificacion enum('C', 'P', 'R') DEFAULT 'C',
-identificacion varchar(10) unique not NULL,
-estado enum('A', 'I') DEFAULT 'A',
-fecha_creacion DATETIME default CURRENT_TIMESTAMP(),
-fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP() on UPDATE CURRENT_TIMESTAMP()
-);
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
-create table zona
-(
-id_zona int auto_increment primary key,
-nombre_zona varchar(255),
-descripcion varchar(255),
-referencia varchar(255),
-fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP(),
-fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP() on UPDATE CURRENT_TIMESTAMP()
-);
+-- ----------------------------
+-- Table structure for cliente
+-- ----------------------------
+DROP TABLE IF EXISTS `cliente`;
+CREATE TABLE `cliente`  (
+  `id_cliente` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `apellido` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `telefono` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `direccion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NULL DEFAULT NULL,
+  `tipo_identificacion` enum('C','P','R') CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NULL DEFAULT 'C',
+  `identificacion` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `estado` enum('A','I') CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NULL DEFAULT 'A',
+  `fecha_creacion` datetime NULL DEFAULT current_timestamp(),
+  `fecha_modificacion` datetime NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_cliente`) USING BTREE,
+  UNIQUE INDEX `email`(`email` ASC) USING BTREE,
+  UNIQUE INDEX `telefono`(`telefono` ASC) USING BTREE,
+  UNIQUE INDEX `identificacion`(`identificacion` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_uca1400_ai_ci ROW_FORMAT = Dynamic;
 
-CREATE table producto
-(
-id_producto int auto_increment primary key,
-nombre varchar(100) not null,
-descripcion varchar(255) not null,
-precio DECIMAL(10,2) not null,
-stock int not null,
-categoria enum('E', 'A', 'L', 'T') COMMENT 'E=ELECTRONICO, A=ALIMENTO, L=LIMPIEZA T=TECNOLOGIA',
-fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP(),
-fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP() on UPDATE CURRENT_TIMESTAMP()
-);
+-- ----------------------------
+-- Records of cliente
+-- ----------------------------
+INSERT INTO `cliente` VALUES (1, 'ERIKA', 'MOPOSITA', 'erika@gmail.com', '7418529633', 'lasso', 'C', '8521470369', 'A', '2025-09-04 12:39:36', '2025-09-05 20:29:19');
+INSERT INTO `cliente` VALUES (2, 'JHON', 'ANDRES', 'juan@gmail.com', '827410963', 'dknds', 'C', '827410852', 'A', '2025-09-04 20:09:03', '2025-09-05 12:18:04');
+INSERT INTO `cliente` VALUES (3, 'fds', 'sfjsdk', 'dmdjs@gmail.com', '134y65645', 'sdsd', 'C', '74182014', 'I', '2025-09-05 21:40:58', '2025-09-05 21:41:01');
 
-CREATE TABLE venta
-(
-id_venta int auto_increment PRIMARY key,
-id_cliente int,
-id_vendedor int not null,
-id_zona INT,
-fecha DATETIME DEFAULT CURRENT_TIMESTAMP(),
-monto_total decimal(10,2),
-fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP(),
-fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP() on UPDATE CURRENT_TIMESTAMP()
-);
+-- ----------------------------
+-- Table structure for detalles_venta
+-- ----------------------------
+DROP TABLE IF EXISTS `detalles_venta`;
+CREATE TABLE `detalles_venta`  (
+  `id_detalle_venta` int(11) NOT NULL AUTO_INCREMENT,
+  `id_venta` int(11) NOT NULL,
+  `id_producto` int(11) NOT NULL,
+  `cantidad` int(11) NOT NULL,
+  `precio_unitario` decimal(10, 2) NULL DEFAULT NULL,
+  `subtotal` decimal(10, 2) NULL DEFAULT NULL,
+  `fecha_creacion` datetime NULL DEFAULT current_timestamp(),
+  `fecha_modificacion` datetime NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_detalle_venta`) USING BTREE,
+  INDEX `fk_detalles_venta`(`id_venta` ASC) USING BTREE,
+  INDEX `fk_detalles_producto`(`id_producto` ASC) USING BTREE,
+  CONSTRAINT `fk_detalles_producto` FOREIGN KEY (`id_producto`) REFERENCES `producto` (`id_producto`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_detalles_venta` FOREIGN KEY (`id_venta`) REFERENCES `venta` (`id_venta`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_uca1400_ai_ci ROW_FORMAT = Dynamic;
 
-create table detalles_venta
-(
-id_detalle_venta int auto_increment PRIMARY key,
-id_venta int not NULL,
-id_producto int not null,
-cantidad int not null,
-precio_unitario DECIMAL(10,2),
-subtotal DECIMAL(10,2),
-fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP(),
-fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP() on UPDATE CURRENT_TIMESTAMP()
-);
+-- ----------------------------
+-- Records of detalles_venta
+-- ----------------------------
+INSERT INTO `detalles_venta` VALUES (1, 1, 1, 2, 400.50, 801.00, '2025-09-05 12:22:53', '2025-09-05 12:22:53');
+INSERT INTO `detalles_venta` VALUES (2, 2, 2, 1, 8.00, 8.00, '2025-09-05 13:08:06', '2025-09-05 13:08:06');
+INSERT INTO `detalles_venta` VALUES (3, 3, 1, 1, 400.50, 400.50, '2025-09-05 21:35:37', '2025-09-05 21:35:37');
 
+-- ----------------------------
+-- Table structure for producto
+-- ----------------------------
+DROP TABLE IF EXISTS `producto`;
+CREATE TABLE `producto`  (
+  `id_producto` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `descripcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `precio` decimal(10, 2) NOT NULL,
+  `stock` int(11) NOT NULL,
+  `categoria` enum('E','A','L','T') CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NULL DEFAULT NULL COMMENT 'E=ELECTRONICO, A=ALIMENTO, L=LIMPIEZA T=TECNOLOGIA',
+  `fecha_creacion` datetime NULL DEFAULT current_timestamp(),
+  `fecha_modificacion` datetime NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_producto`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_uca1400_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of producto
+-- ----------------------------
+INSERT INTO `producto` VALUES (1, 'Refrigerador', 'Refrigerados de 2 compuertas color gris', 400.50, 39, 'E', '2025-09-04 20:15:09', '2025-09-05 21:35:37');
+INSERT INTO `producto` VALUES (2, 'Mariscos', 'Mariscos', 8.00, 19, 'A', '2025-09-04 20:44:24', '2025-09-05 13:08:06');
+INSERT INTO `producto` VALUES (3, 'Laptop', 'Azus 8ram 1gb almacenamiento', 800.00, 2, 'T', '2025-09-05 19:52:16', '2025-09-05 19:52:16');
+INSERT INTO `producto` VALUES (4, 'Dron', 'Dron aereo', 60.00, 2, 'T', '2025-09-05 19:52:42', '2025-09-05 19:52:42');
+
+-- ----------------------------
+-- Table structure for vendedor
+-- ----------------------------
+DROP TABLE IF EXISTS `vendedor`;
+CREATE TABLE `vendedor`  (
+  `id_vendedor` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `apellido` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `email` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `telefono` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `direccion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NULL DEFAULT NULL,
+  `tipo_identificacion` enum('C','P','R') CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NULL DEFAULT 'C' COMMENT 'C=CEDULA, P=PASAPORTE, R=RUC',
+  `identificacion` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `usuario` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `clave` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NOT NULL,
+  `estado` enum('A','I') CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NULL DEFAULT 'A' COMMENT 'A=ACTIVO, I=INACTIVO',
+  `fecha_creacion` datetime NULL DEFAULT current_timestamp() COMMENT 'FECHA DE CREACION DEL VENDEDOR',
+  `fecha_modificacion` datetime NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_vendedor`) USING BTREE,
+  UNIQUE INDEX `email`(`email` ASC) USING BTREE,
+  UNIQUE INDEX `telefono`(`telefono` ASC) USING BTREE,
+  UNIQUE INDEX `identificacion`(`identificacion` ASC) USING BTREE,
+  UNIQUE INDEX `usuario`(`usuario` ASC) USING BTREE,
+  UNIQUE INDEX `clave`(`clave` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_uca1400_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of vendedor
+-- ----------------------------
+INSERT INTO `vendedor` VALUES (1, 'Alex', 'Ugsha', 'alexugsha87@gmail.com', '7418529630', 'av amazonas', 'C', '5214023587', 'lex', '$2y$10$lbBeoxZMEynNOcNJLnZ1.Oqb7wPEohJQNBsebHXzl2AhaCm08BGWi', 'A', '2025-09-04 10:05:41', '2025-09-05 21:06:20');
+INSERT INTO `vendedor` VALUES (2, 'Roni', 'Caiza', 'mawi@gmail.com', '82741930', 'Lasso\n', 'C', '0521478541', 'mawi', '$2y$10$iDnmLPwxCoo47kCyieueBOEWx30zI9YnsPKp/JT7Q8zZ5YbsuAw62', 'A', '2025-09-04 20:09:50', '2025-09-05 20:10:43');
+
+-- ----------------------------
+-- Table structure for venta
+-- ----------------------------
+DROP TABLE IF EXISTS `venta`;
+CREATE TABLE `venta`  (
+  `id_venta` int(11) NOT NULL AUTO_INCREMENT,
+  `id_cliente` int(11) NULL DEFAULT NULL,
+  `id_vendedor` int(11) NOT NULL,
+  `id_zona` int(11) NULL DEFAULT NULL,
+  `fecha` datetime NULL DEFAULT current_timestamp(),
+  `monto_total` decimal(10, 2) NULL DEFAULT NULL,
+  `fecha_creacion` datetime NULL DEFAULT current_timestamp(),
+  `fecha_modificacion` datetime NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_venta`) USING BTREE,
+  INDEX `fk_venta_cliente`(`id_cliente` ASC) USING BTREE,
+  INDEX `fk_venta_vendedor`(`id_vendedor` ASC) USING BTREE,
+  INDEX `fk_venta_zona`(`id_zona` ASC) USING BTREE,
+  CONSTRAINT `fk_venta_cliente` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_venta_vendedor` FOREIGN KEY (`id_vendedor`) REFERENCES `vendedor` (`id_vendedor`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_venta_zona` FOREIGN KEY (`id_zona`) REFERENCES `zona` (`id_zona`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_uca1400_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of venta
+-- ----------------------------
+INSERT INTO `venta` VALUES (1, 1, 1, 1, '2025-09-05 12:22:53', 801.00, '2025-09-05 12:22:53', '2025-09-05 12:22:53');
+INSERT INTO `venta` VALUES (2, 2, 2, 2, '2025-09-05 13:08:06', 8.00, '2025-09-05 13:08:06', '2025-09-05 13:08:06');
+INSERT INTO `venta` VALUES (3, 1, 1, 1, '2025-09-05 21:35:37', 400.50, '2025-09-05 21:35:37', '2025-09-05 21:35:37');
+
+-- ----------------------------
+-- Table structure for zona
+-- ----------------------------
+DROP TABLE IF EXISTS `zona`;
+CREATE TABLE `zona`  (
+  `id_zona` int(11) NOT NULL AUTO_INCREMENT,
+  `nombre_zona` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NULL DEFAULT NULL,
+  `descripcion` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NULL DEFAULT NULL,
+  `referencia` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci NULL DEFAULT NULL,
+  `fecha_creacion` datetime NULL DEFAULT current_timestamp(),
+  `fecha_modificacion` datetime NULL DEFAULT current_timestamp() ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_zona`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_uca1400_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of zona
+-- ----------------------------
+INSERT INTO `zona` VALUES (1, 'EDIFICIO COMPUTRON', 'Edifico de 4 pisos, en la calle Rafael Av. 4 de Julio', 'Frente a la Iglesia San Fernando', '2025-09-04 19:57:27', '2025-09-04 19:57:27');
+INSERT INTO `zona` VALUES (2, 'PRESA LOS MARISCOS DE JUANOS', 'Muelle 12, En el canton de los peces', 'cerca del embarcadero del sur\n\n', '2025-09-04 19:58:39', '2025-09-04 19:58:47');
+INSERT INTO `zona` VALUES (3, 'ZONA AZUL', 'Edificio rojo', 'Frente a la estacion verde\n', '2025-09-05 19:51:32', '2025-09-05 19:51:32');
+
+-- ----------------------------
+-- Procedure structure for sp_crear_venta
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sp_crear_venta`;
+delimiter ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_crear_venta`(
+    IN p_id_cliente INT,
+    IN p_id_vendedor INT,
+    IN p_id_zona INT,
+    IN p_detalles JSON
+)
+BEGIN
+    DECLARE total_venta DECIMAL(10,2) DEFAULT 0;
+    DECLARE nueva_venta_id INT;
+    DECLARE i INT DEFAULT 0;
+    DECLARE detalle_count INT;
+    DECLARE product_id INT;
+    DECLARE quantity INT;
+    DECLARE price DECIMAL(10,2);
+    
+    -- Calcular el total
+    SET detalle_count = JSON_LENGTH(p_detalles);
+    WHILE i < detalle_count DO
+        SET product_id = JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].id_producto'));
+        SET quantity = JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].cantidad'));
+        SET price = JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].precio_unitario'));
+        
+        SET total_venta = total_venta + (quantity * price);
+        SET i = i + 1;
+    END WHILE;
+    
+    -- Insertar la venta principal
+    INSERT INTO venta (id_cliente, id_vendedor, id_zona, monto_total)
+    VALUES (p_id_cliente, p_id_vendedor, p_id_zona, total_venta);
+    
+    SET nueva_venta_id = LAST_INSERT_ID();
+    
+    -- Insertar detalles
+    SET i = 0;
+    WHILE i < detalle_count DO
+        SET product_id = JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].id_producto'));
+        SET quantity = JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].cantidad'));
+        SET price = JSON_EXTRACT(p_detalles, CONCAT('$[', i, '].precio_unitario'));
+        
+        INSERT INTO detalles_venta (id_venta, id_producto, cantidad, precio_unitario, subtotal)
+        VALUES (nueva_venta_id, product_id, quantity, price, quantity * price);
+        
+        -- Actualizar stock
+        UPDATE producto SET stock = stock - quantity WHERE id_producto = product_id;
+        
+        SET i = i + 1;
+    END WHILE;
+    
+    SELECT nueva_venta_id AS id_venta_creada;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for sp_dashboard_totales
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sp_dashboard_totales`;
+delimiter ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_dashboard_totales`()
+BEGIN
+    SELECT 
+        (SELECT COUNT(*) FROM cliente WHERE estado = 'A') AS total_clientes,
+        (SELECT COUNT(*) FROM venta) AS total_ventas,
+        (SELECT COUNT(*) FROM vendedor WHERE estado = 'A') AS total_vendedores,
+        (SELECT COUNT(*) FROM producto) AS total_productos;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for sp_eliminar_venta
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sp_eliminar_venta`;
+delimiter ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_eliminar_venta`(IN venta_id INT)
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE product_id INT;
+    DECLARE quantity INT;
+    DECLARE cur CURSOR FOR 
+        SELECT id_producto, cantidad FROM detalles_venta WHERE id_venta = venta_id;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    START TRANSACTION;
+    
+    -- Restaurar stock primero
+    OPEN cur;
+    read_loop: LOOP
+        FETCH cur INTO product_id, quantity;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        UPDATE producto SET stock = stock + quantity WHERE id_producto = product_id;
+    END LOOP;
+    CLOSE cur;
+    
+    -- Eliminar detalles
+    DELETE FROM detalles_venta WHERE id_venta = venta_id;
+    
+    -- Eliminar venta principal
+    DELETE FROM venta WHERE id_venta = venta_id;
+    
+    COMMIT;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for sp_obtener_detalles_venta
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sp_obtener_detalles_venta`;
+delimiter ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_detalles_venta`(IN venta_id INT)
+BEGIN
+    SELECT 
+        dv.id_detalle_venta,
+        dv.id_producto,
+        p.nombre AS nombre_producto,
+        dv.cantidad,
+        dv.precio_unitario,
+        dv.subtotal
+    FROM detalles_venta dv
+    INNER JOIN producto p ON dv.id_producto = p.id_producto
+    WHERE dv.id_venta = venta_id;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for sp_obtener_ventas_completas
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sp_obtener_ventas_completas`;
+delimiter ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_ventas_completas`()
+BEGIN
+    SELECT 
+        v.id_venta,
+        v.fecha,
+        v.monto_total,
+        c.id_cliente,
+        CONCAT(c.nombre, ' ', c.apellido) AS nombre_cliente,
+        ved.id_vendedor,
+        CONCAT(ved.nombre, ' ', ved.apellido) AS nombre_vendedor,
+        z.id_zona,
+        z.nombre_zona
+    FROM venta v
+    LEFT JOIN cliente c ON v.id_cliente = c.id_cliente
+    INNER JOIN vendedor ved ON v.id_vendedor = ved.id_vendedor
+    LEFT JOIN zona z ON v.id_zona = z.id_zona
+    ORDER BY v.fecha DESC;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for sp_obtener_venta_por_id
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sp_obtener_venta_por_id`;
+delimiter ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_obtener_venta_por_id`(IN p_id_venta INT)
+BEGIN
+    SELECT 
+        v.id_venta,
+        v.fecha,
+        v.monto_total,
+        v.id_cliente,
+        -- Concatenamos nombre y apellido para tener el nombre completo del cliente
+        CONCAT(c.nombre, ' ', c.apellido) AS nombre_cliente,
+        v.id_vendedor,
+        -- Concatenamos nombre y apellido para tener el nombre completo del vendedor
+        CONCAT(ved.nombre, ' ', ved.apellido) AS nombre_vendedor,
+        v.id_zona,
+        z.nombre_zona
+    FROM 
+        venta v
+    -- Usamos LEFT JOIN por si una venta no tiene un cliente asociado (aunque debería)
+    LEFT JOIN 
+        cliente c ON v.id_cliente = c.id_cliente
+    -- Usamos INNER JOIN porque una venta siempre debe tener un vendedor
+    INNER JOIN 
+        vendedor ved ON v.id_vendedor = ved.id_vendedor
+    -- Usamos LEFT JOIN por si una venta no tiene una zona asociada
+    LEFT JOIN 
+        zona z ON v.id_zona = z.id_zona
+    WHERE 
+        v.id_venta = p_id_venta;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for sp_vendedores_sin_ventas
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sp_vendedores_sin_ventas`;
+delimiter ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_vendedores_sin_ventas`(IN fecha_inicio DATE, IN fecha_fin DATE)
+BEGIN
+    SELECT 
+        ved.*
+    FROM vendedor ved
+    WHERE ved.id_vendedor NOT IN (
+        SELECT DISTINCT v.id_vendedor
+        FROM venta v
+        WHERE DATE(v.fecha) BETWEEN fecha_inicio AND fecha_fin
+    )
+    AND ved.estado = 'A';
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for sp_ventas_anuales_cliente
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sp_ventas_anuales_cliente`;
+delimiter ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_ventas_anuales_cliente`()
+BEGIN
+    SELECT 
+        c.id_cliente,
+        CONCAT(c.nombre, ' ', c.apellido) AS nombre_cliente,
+        z.nombre_zona,
+        SUM(CASE WHEN YEAR(v.fecha) = 2020 THEN v.monto_total ELSE 0 END) AS ventas_2020,
+        SUM(CASE WHEN YEAR(v.fecha) = 2021 THEN v.monto_total ELSE 0 END) AS ventas_2021,
+        SUM(CASE WHEN YEAR(v.fecha) = 2022 THEN v.monto_total ELSE 0 END) AS ventas_2022,
+        SUM(CASE WHEN YEAR(v.fecha) = 2023 THEN v.monto_total ELSE 0 END) AS ventas_2023
+    FROM cliente c
+    LEFT JOIN venta v ON c.id_cliente = v.id_cliente
+    LEFT JOIN zona z ON v.id_zona = z.id_zona
+    GROUP BY c.id_cliente, z.id_zona
+    ORDER BY c.id_cliente;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for sp_zonas_sin_ventas
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sp_zonas_sin_ventas`;
+delimiter ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_zonas_sin_ventas`(IN fecha_inicio DATE, IN fecha_fin DATE)
+BEGIN
+    SELECT 
+        z.*
+    FROM zona z
+    WHERE z.id_zona NOT IN (
+        SELECT DISTINCT v.id_zona
+        FROM venta v
+        WHERE DATE(v.fecha) BETWEEN fecha_inicio AND fecha_fin
+    );
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for sp_zona_ventas_por_vendedor
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `sp_zona_ventas_por_vendedor`;
+delimiter ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_zona_ventas_por_vendedor`()
+BEGIN
+    SELECT 
+        v.id_vendedor,
+        CONCAT(ved.nombre, ' ', ved.apellido) AS nombre_vendedor,
+        z.nombre_zona,
+        COUNT(v.id_venta) AS total_ventas,
+        SUM(v.monto_total) AS monto_total
+    FROM venta v
+    INNER JOIN vendedor ved ON v.id_vendedor = ved.id_vendedor
+    INNER JOIN zona z ON v.id_zona = z.id_zona
+    GROUP BY v.id_vendedor, v.id_zona
+    ORDER BY total_ventas DESC;
+END
+;;
+delimiter ;
+
+SET FOREIGN_KEY_CHECKS = 1;
